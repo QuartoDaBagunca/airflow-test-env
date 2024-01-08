@@ -20,7 +20,6 @@ import json
 
 DEFAULT_DATE = pendulum.datetime(2022, 3, 4, tz='America/Toronto')
 #Get slack connection information
-# slack_conn_id = "slack_oms_notification"
 # slack_webhook_token = BaseHook.get_connection(slack_conn_id).password
 # slack_webhook_url = BaseHook.get_connection(slack_conn_id).host
 # slack_connection = slack_webhook_url+slack_webhook_token
@@ -36,25 +35,21 @@ default_args = {
     , 'retry_delay': timedelta(minutes=2)
 }
 
-READ_PRJ_RAW = 'raw-zone-005'
+READ_PRJ_RAW = 'bronze-zone'
 
-READ_PRJ_TRUSTED = 'trusted-zone'
+READ_PRJ_TRUSTED = 'silver-zone'
 
-WRITE_PRJ_RAW = 'sandbox-oms'
+WRITE_PRJ_RAW = '?'
 
-WRITE_PRJ_TRUSTED = 'sandbox-oms'
+WRITE_PRJ_TRUSTED = '?'
 
-FUNCTION_TRIGGER = "fnc-oms-manual-files"
+FUNCTION_TRIGGER = "fnc-manual-files"
 
-BUCKET_NAME = "gb_oms_data_transfer_files_testes"
-
-GCF_CONNECTION = "http_conn_sandbox_oms"#"AIRFLOW_CONN_HTTP_DEFAULT"
-
-SLACK_CONNECTION = "https://hooks.slack.com/services/***"
+BUCKET_NAME = "gb_data_transfer_files_testes"
 
 DEFAULT_TOLERANCE_DAYS = "30"
 
-URL_FUNCTION = "https://us-central1-sandbox-oms.cloudfunctions.net/"
+URL_FUNCTION = "https://us-central1-?.cloudfunctions.net/"
 
 # NOTE: Operator para a separação lógica dos fluxos 
 #### URL: https://hooks.slack.com/services/***; #### STATE: success; #### TASKID: func_raw_tb_necessidade_abastecimento_eud; #### RESPONSE TXT: {"status":"200", "message": "success"}; #### RESPONSE CODE: 200
@@ -152,24 +147,12 @@ with DAG(
 
     dict_bash = {
 
-      "tab_oms_manual-files_load_minutely": [
+      "tab_manual-files_load_minutely": [
         {
-            "job_name": "fnc_priorizacao_canais",
-            "gcs_origin_folder": "dados_eudora/priorizacao_canais.xlsx",
-                "fileserver_path": "/mnt/sistemas/PRD/DATAPLATFORM/INPUT/OMS-RATEIOS_INTELIGENTES/PRIORIZACAO_CANAIS",
+            "job_name": "fnc_my_new_func",
+            "gcs_origin_folder": ".xlsx",
+                "fileserver_path": "",
                 "body": {
-                        "table_name": "priorizacao_canais",
-                        "table_full_name": "sandbox-oms.raw_oms.priorizacao_canais",
-                        "bucket_path": "gs://gb_oms_data_transfer_files_testes/dados_eudora/priorizacao_canais.xlsx",
-                        "delta_type": "FULL",
-                        "current_datetime_field":"dt_processamento",
-                        "current_datetime_format":"%Y-%m-%d %H:%M:%S.%f UTC",
-                        "table_schema": "",
-                        "dataqualitys" :[
-                            {"table_name": "trusted-zone.material.tb_material", "tolerance_days": "", "primary_key": "cod_material, cod_un_material"},
-                            {"table_name": "trusted-zone.sellin.tb_cliente_eud", "tolerance_days": "", "primary_key": "dt_processamento, cod_pdv, cod_de_para, cod_cliente_s4"},
-                            {"table_name": "raw-zone-005.raw_oms.priorizacao_canais", "tolerance_days": "30", "primary_key": ""}
-                        ]
                 }
             }
         ]
@@ -177,16 +160,15 @@ with DAG(
     }
 
     # var_env = json.loads(open("var_env.json", "r").read())
-    var_env = json.loads(open("dag_oms_manual-files_load_minutely.json", "r").read())
+    var_env = json.loads(open("dag_manual-files_load_minutely.json", "r").read())
 
-    READ_PRJ_SENSITIVE_TRUSTED   = var_env["dag_oms_manual-files_load_minutely"]["read_prj_sensitive_trusted"]
+    READ_PRJ_SENSITIVE_TRUSTED   = var_env["dag_manual-files_load_minutely"]["read_prj_silver"]
 
-    # for param_dict in var_env["tab_oms_manual-files_load_minutely"]:
-    for param_dict in dict_bash["tab_oms_manual-files_load_minutely"]:
+    # for param_dict in var_env["tab_manual-files_load_minutely"]:
+    for param_dict in dict_bash["tab_manual-files_load_minutely"]:
 
         # file_prefix = "base_cen_clientes_eud"
         # filename_pattern = f"{file_prefix}.csv"
-        # key_folder = "dados_eudora"
 
         bucket_name = BUCKET_NAME
         job_name = param_dict['job_name']
@@ -200,15 +182,6 @@ with DAG(
             task_id=f"file_transfer_{job_name}", 
             dag=dag
         )
-
-        # file_transfer = LocalFilesystemToGCSOperator(
-        #     task_id=f"file_transfer_{job_name}",
-        #     src="/home/diegoh/Downloads/Upload/priorizacao_canais.csv",
-        #     dst="dados_eudora/priorizacao_canais.csv",
-        #     bucket="gb_oms_data_transfer_files_testes",
-        #     # gcp_conn_id="gcp",
-        #     mime_type="csv",
-        # )
 
         gcs_sensor = GCSObjectExistenceSensor(
             task_id=f"gcs_sensor_{job_name}",
@@ -241,7 +214,7 @@ with DAG(
                 task_id=f'func_raw_{file_prefix}'
                 , python_callable=sendmessage
                 , op_kwargs={
-                    'url': SLACK_CONNECTION
+                    'url': "SLACK_CONNECTION"
                     , 'taskId': f'func_raw_tb_{file_prefix}'
                     , 'dict_payload': dict_payload
                 }
