@@ -52,7 +52,6 @@ DEFAULT_TOLERANCE_DAYS = "30"
 URL_FUNCTION = "https://us-central1-?.cloudfunctions.net/"
 
 # NOTE: Operator para a separação lógica dos fluxos 
-#### URL: https://hooks.slack.com/services/***; #### STATE: success; #### TASKID: func_raw_tb_necessidade_abastecimento_eud; #### RESPONSE TXT: {"status":"200", "message": "success"}; #### RESPONSE CODE: 200
 
 def sendmessage(url, taskId, dict_payload):
 
@@ -167,7 +166,6 @@ with DAG(
     # for param_dict in var_env["tab_manual-files_load_minutely"]:
     for param_dict in dict_bash["tab_manual-files_load_minutely"]:
 
-        # file_prefix = "base_cen_clientes_eud"
         # filename_pattern = f"{file_prefix}.csv"
 
         bucket_name = BUCKET_NAME
