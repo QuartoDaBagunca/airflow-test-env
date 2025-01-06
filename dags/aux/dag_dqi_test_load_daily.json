@@ -1,0 +1,32 @@
+{
+
+    "dag_dqi_test_load_daily": {
+        "id_iniciativa": "inic496",
+        "tags": [
+            "Carga Critica",
+            "Refined"
+        ],
+        "description": "Código não será produtizado. DAG de teste para execução de procedure modelo do DQ Interno.",
+        "success_notification": "\nCarga realizada com sucesso!",
+        "error_notification": "\nFalha no pipeline da carga, verificar dataqualities ou procedure!!",
+        "error_dqi_notification": "Falha Detectada: {} \nATENCAO: \nCaso erro na task {} estiver relacionado ao dataquality interno, \nfavor marcar a mesma como sucesso para liberar o pipe do compra inteligente \nantes de verificar a causa raiz da falha.",
+        "schedule_interval": null,
+        "retries": 0,
+        "retry_delay": 5,
+        "bucket_project_sensitive_raw": "sensitive-raw",
+        "slack_connection"          : "http_slack_manual-files",
+
+        "read_prj_raw"              : "raw-zone-005",
+        "read_prj_raw_custom"       : "raw-custom-zone",
+        "read_prj_trusted"          : "sandbox-vs-franqueado",
+        "read_prj_refined"          : "refined-zone",
+        "sensitive_raw_project"     : "sensitive-raw",
+        "sensitive_trusted_project" : "sensitive-trusted",
+        "sensitive_refined_project" : "sensitive-refined",
+        "quality_project"           : "data-quality-gb",
+        "write_prj_raw"             : "sandbox-ae-mar-ci",
+        "write_prj_raw_custom"      : "sandbox-ae-mar-ci",
+        "write_prj_trusted"         : "sandbox-ae-mar-ci",
+        "write_prj_refined"         : "sandbox-ae-mar-ci"
+    }
+}
